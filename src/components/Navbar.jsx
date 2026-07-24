@@ -2,14 +2,20 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, Heart, Film, X } from 'lucide-react'
 import useStore from '../store/useStore'
+import useAuthStore from '../store/useAuthStore'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [localQuery, setLocalQuery] = useState('')
   const { setSearchQuery } = useStore()
+  const { user } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
+
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U'
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -85,9 +91,12 @@ export default function Navbar() {
           <Link to="/watchlist" className="text-gray-300 hover:text-white transition-colors">
             <Heart size={20} />
           </Link>
-          <div className="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center text-sm font-bold">
-            U
-          </div>
+          <Link
+            to="/profile"
+            className="w-8 h-8 rounded-full bg-brand-red flex items-center justify-center text-sm font-bold hover:ring-2 hover:ring-white/50 transition-all"
+          >
+            {initials}
+          </Link>
         </div>
       </div>
     </nav>
