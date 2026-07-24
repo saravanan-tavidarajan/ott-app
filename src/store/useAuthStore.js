@@ -1,32 +1,18 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { authService } from '../services/authService'
 
 const useAuthStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       isAuthenticated: false,
-      isLoading: false,
-      error: null,
 
-      login: async (username, password) => {
-        set({ isLoading: true, error: null })
-        try {
-          const { user, token } = await authService.login(username, password)
-          set({ user, token, isAuthenticated: true, isLoading: false })
-        } catch (err) {
-          set({ error: err.message, isLoading: false })
-          throw err
-        }
-      },
+      setAuth: (user, token) =>
+        set({ user, token, isAuthenticated: true }),
 
-      logout: () => {
-        set({ user: null, token: null, isAuthenticated: false, error: null })
-      },
-
-      clearError: () => set({ error: null }),
+      logout: () =>
+        set({ user: null, token: null, isAuthenticated: false }),
     }),
     {
       name: 'ott-auth',

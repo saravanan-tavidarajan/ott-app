@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom'
 import { Heart, Play } from 'lucide-react'
-import { getVideoById } from '../data/videos'
 import VideoCard from '../components/VideoCard'
 import useStore from '../store/useStore'
+import { useVideos } from '../hooks/useVideos'
 
 export default function WatchlistPage() {
   const { watchlist } = useStore()
-  const watchlistVideos = watchlist.map((id) => getVideoById(id)).filter(Boolean)
+  const { videos } = useVideos()
+  const watchlistVideos = watchlist.map((id) => videos.find((v) => v.id === id)).filter(Boolean)
 
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 max-w-7xl mx-auto">

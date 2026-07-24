@@ -1,8 +1,9 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import ReactPlayer from 'react-player'
-import { ArrowLeft, Heart, Tag } from 'lucide-react'
-import { getVideoById } from '../data/videos'
+import { ArrowLeft, Heart, Loader2 } from 'lucide-react'
+import { photosService } from '../services/photosService'
+import useAuthStore from '../store/useAuthStore'
 import useStore from '../store/useStore'
 
 export default function WatchPage() {
@@ -10,38 +11,54 @@ export default function WatchPage() {
   const navigate = useNavigate()
   const playerRef = useRef(null)
   const hasSeekRef = useRef(false)
+  const { token } = useAuthStore()
 
-  const video = getVideoById(id)
-  console.log("video", video)
+  const [video, setVideo] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
   const { isInWatchlist, toggleWatchlist, updateProgress, getProgress } = useStore()
+  const savedProgress = video ? getProgress(video.id) : null
 
-  const savedProgress = getProgress(Number(id))
+  useEffect(() => {
+    hasSeekRef.current = false
+    setLoading(true)
+    setError(null)
+
+    photosService.getVideoById(token, id)
+      .then(({ video: v }) => setVideo(v))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [id, token])
 
   const handleReady = () => {
-    console.log("playerRef", playerRef)
     if (!hasSeekRef.current && savedProgress && savedProgress.seconds > 5) {
       playerRef.current?.seekTo(savedProgress.seconds, 'seconds')
       hasSeekRef.current = true
     }
   }
 
-  const handleProgress = ({ playedSeconds, played }) => {
-    console.log(playedSeconds, played);
+  const handleProgress = ({ playedSeconds }) => {
     if (video && playedSeconds > 1) {
       updateProgress(video.id, playedSeconds, playerRef.current?.getDuration() || 0)
     }
   }
 
-  useEffect(() => {
-    hasSeekRef.current = false
-  }, [id])
-
-  if (!video) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-gray-400 gap-4">
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Loader2 size={36} className="text-white animate-spin" />
+      </div>
+    )
+  }
+
+  if (error || !video) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-gray-400 gap-4">
         <p className="text-xl">Video not found.</p>
-        <button onClick={() => navigate('/')} className="text-brand-red hover:underline">
-          Back to Home
+        <p className="text-sm text-gray-600">{error}</p>
+        <button onClick={() => navigate(-1)} className="text-brand-red hover:underline text-sm">
+          Go Back
         </button>
       </div>
     )
@@ -51,7 +68,6 @@ export default function WatchPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Back button overlay */}
       <button
         onClick={() => navigate(-1)}
         className="fixed top-4 left-4 z-50 flex items-center gap-2 text-white bg-black/60 hover:bg-black/80 px-3 py-2 rounded-full text-sm transition-colors"
@@ -75,31 +91,30 @@ export default function WatchPage() {
         />
       </div>
 
-      {/* Video info */}
+      {/* Info */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex-1 min-w-0">
             <h1 className="text-white text-2xl sm:text-3xl font-bold mb-1">{video.title}</h1>
-            <p className="text-gray-400 text-sm mb-4">{video.subtitle}</p>
-            <p className="text-gray-300 text-sm leading-relaxed">{video.description}</p>
+            {video.createdAt && (
+              <p className="text-gray-400 text-sm">
+                {new Date(video.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric', month: 'long', day: 'numeric',
+                })}
+              </p>
+            )}
           </div>
-          <div className="flex flex-col items-end gap-3 flex-shrink-0">
-            <button
-              onClick={() => toggleWatchlist(video.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors ${
-                inWatchlist
-                  ? 'bg-brand-red text-white hover:bg-red-700'
-                  : 'bg-gray-700 text-white hover:bg-gray-600'
-              }`}
-            >
-              <Heart size={16} fill={inWatchlist ? 'white' : 'none'} />
-              {inWatchlist ? 'Remove from List' : 'Add to My List'}
-            </button>
-            <span className="flex items-center gap-1.5 text-xs text-gray-400 bg-gray-800 px-3 py-1.5 rounded-full">
-              <Tag size={12} />
-              {video.category}
-            </span>
-          </div>
+          <button
+            onClick={() => toggleWatchlist(video.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors ${
+              inWatchlist
+                ? 'bg-brand-red text-white hover:bg-red-700'
+                : 'bg-gray-700 text-white hover:bg-gray-600'
+            }`}
+          >
+            <Heart size={16} fill={inWatchlist ? 'white' : 'none'} />
+            {inWatchlist ? 'Remove from List' : 'Add to My List'}
+          </button>
         </div>
 
         {savedProgress && (

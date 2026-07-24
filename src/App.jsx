@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 import HomePage from './pages/HomePage'
 import WatchPage from './pages/WatchPage'
 import SearchPage from './pages/SearchPage'
@@ -14,8 +15,9 @@ export default function App() {
     <BrowserRouter>
       <div className="dark min-h-screen bg-brand-dark">
         <Routes>
-          {/* Public route */}
+          {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
           {/* Watch page — full screen, no navbar */}
           <Route

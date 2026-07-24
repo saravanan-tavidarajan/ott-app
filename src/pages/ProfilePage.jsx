@@ -1,67 +1,68 @@
 import { useNavigate } from 'react-router-dom'
-import { LogOut, User, Mail, Tag, Calendar, Play, Heart, Clock } from 'lucide-react'
+import { LogOut, Mail, Calendar, Play, Heart, Clock } from 'lucide-react'
 import useAuthStore from '../store/useAuthStore'
 import useStore from '../store/useStore'
-import { getVideoById } from '../data/videos'
 import VideoCard from '../components/VideoCard'
-
-function Avatar({ name, size = 'lg' }) {
-  const initials = name
-    ? name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : 'U'
-  const sizeClass = size === 'lg' ? 'w-20 h-20 text-2xl' : 'w-8 h-8 text-sm'
-  return (
-    <div className={`${sizeClass} rounded-full bg-brand-red flex items-center justify-center font-bold text-white flex-shrink-0`}>
-      {initials}
-    </div>
-  )
-}
+import { useVideos } from '../hooks/useVideos'
 
 export default function ProfilePage() {
   const { user, logout } = useAuthStore()
   const { watchlist, progress } = useStore()
+  const { videos } = useVideos()
   const navigate = useNavigate()
 
   const watchedCount = Object.keys(progress).length
   const continueWatchingCount = Object.values(progress).filter(
     (p) => p.percent > 0.05 && p.percent < 0.95
   ).length
-  const watchlistVideos = watchlist.map((id) => getVideoById(id)).filter(Boolean).slice(0, 5)
+
+  const watchlistVideos = watchlist
+    .map((id) => videos.find((v) => v.id === id))
+    .filter(Boolean)
+    .slice(0, 5)
+
+  const joinDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '—'
 
   const handleLogout = () => {
     logout()
     navigate('/login', { replace: true })
   }
 
-  const joinDate = user?.joinedAt
-    ? new Date(user.joinedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : '—'
-
   return (
     <div className="min-h-screen pt-24 pb-12 px-4 sm:px-6 max-w-4xl mx-auto">
       {/* Header card */}
       <div className="bg-gray-900 rounded-xl p-6 sm:p-8 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-        <Avatar name={user?.name} size="lg" />
+        {/* Google avatar */}
+        {user?.picture ? (
+          <img
+            src={user.picture}
+            alt={user.name}
+            className="w-20 h-20 rounded-full object-cover flex-shrink-0 ring-2 ring-gray-700"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-brand-red flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
+            {user?.name ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+          </div>
+        )}
+
         <div className="flex-1 min-w-0">
           <h1 className="text-white text-2xl font-bold">{user?.name}</h1>
           <span className="inline-block mt-1 mb-3 text-xs text-brand-red font-semibold bg-brand-red/10 border border-brand-red/30 px-2.5 py-1 rounded-full">
-            {user?.role}
+            Google Account
           </span>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-400">
-            <span className="flex items-center gap-2">
-              <User size={14} className="text-gray-500" /> {user?.username}
-            </span>
+          <div className="flex flex-col gap-1.5 text-sm text-gray-400">
             <span className="flex items-center gap-2">
               <Mail size={14} className="text-gray-500" /> {user?.email}
-            </span>
-            <span className="flex items-center gap-2">
-              <Tag size={14} className="text-gray-500" /> ID: {user?.id}
             </span>
             <span className="flex items-center gap-2">
               <Calendar size={14} className="text-gray-500" /> Member since {joinDate}
             </span>
           </div>
         </div>
+
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors self-start sm:self-center flex-shrink-0"
@@ -118,7 +119,7 @@ export default function ProfilePage() {
       {watchlist.length === 0 && (
         <div className="bg-gray-900 rounded-xl p-8 text-center text-gray-500">
           <Heart size={36} className="mx-auto mb-3 opacity-20" />
-          <p className="text-sm">No saved videos yet. Browse and add some!</p>
+          <p className="text-sm">No saved videos yet.</p>
         </div>
       )}
     </div>
