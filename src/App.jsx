@@ -9,6 +9,7 @@ import SearchPage from './pages/SearchPage'
 import WatchlistPage from './pages/WatchlistPage'
 import BrowsePage from './pages/BrowsePage'
 import ProfilePage from './pages/ProfilePage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
           {/* Watch page — full screen, no navbar */}
           <Route
