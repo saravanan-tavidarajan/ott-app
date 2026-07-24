@@ -133,7 +133,7 @@ export default function LandingPage() {
           </div>
           <div className="flex gap-6">
             <Link to="/privacy-policy" className="hover:text-gray-400 transition-colors">Privacy Policy</Link>
-            <a href="mailto:saran.trs@gmail.com" className="hover:text-gray-400 transition-colors">Contact</a>
+            <a href="mailto:saran[dot]trs[at]gmail[dot]com" className="hover:text-gray-400 transition-colors">Contact</a>
           </div>
           <p>© 2026 StreamApp. All rights reserved.</p>
         </div>
