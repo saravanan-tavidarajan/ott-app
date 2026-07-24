@@ -30,7 +30,7 @@ export default function AuthCallbackPage() {
     authService.getMe(token)
       .then(({ user }) => {
         setAuth(user, token)
-        navigate('/', { replace: true })
+        navigate('/home', { replace: true })
       })
       .catch(() => {
         navigate('/login?error=auth_failed', { replace: true })

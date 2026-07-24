@@ -48,14 +48,14 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 text-brand-red font-bold text-xl tracking-widest uppercase">
+        <Link to="/home" className="flex items-center gap-2 text-brand-red font-bold text-xl tracking-widest uppercase">
           <Film size={24} />
           StreamApp
         </Link>
 
         {/* Nav Links */}
         <div className="hidden md:flex items-center gap-6 text-sm text-gray-300">
-          <Link to="/" className="hover:text-white transition-colors">Home</Link>
+          <Link to="/home" className="hover:text-white transition-colors">Home</Link>
           <Link to="/browse" className="hover:text-white transition-colors">Browse</Link>
           <Link to="/watchlist" className="hover:text-white transition-colors">My List</Link>
         </div>
